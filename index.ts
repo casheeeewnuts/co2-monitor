@@ -5,13 +5,13 @@ const sp = new SerialPort({
   baudRate: 9600
 })
 
-sp.on("close", (err) => {
+sp.on("close", (err: Error) => {
   console.error(err)
 
   process.exit(1)
 })
 
-sp.on("data", (data) => {
+sp.on("data", (data: Buffer) => {
   console.log(data)
 })
 
