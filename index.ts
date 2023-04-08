@@ -1,6 +1,7 @@
 import {SerialPort} from "serialport";
 
 const READ_CO2 = [0xFF, 0x01, 0x86, 0x00, 0x00, 0x00, 0x00, 0x00];
+const CALIBRATE_ZERO_POINT = [0xFF, 0x01, 0x87, 0x00, 0x00, 0x00, 0x00, 0x00];
 
 const sp = new SerialPort({
   path: "/dev/serial0",
@@ -15,8 +16,12 @@ sp.on("close", (err: Error) => {
 
 sp.on("data", (data: Buffer) => {
   console.log(data)
+  const [startByte, command, high, low, ...rest] = data;
+
+  console.log(`CO2 concentration is ${high * 256 + low}ppm`)
 })
 
+sp.write([...CALIBRATE_ZERO_POINT, getCheckSum(CALIBRATE_ZERO_POINT)])
 sp.write([...READ_CO2, getCheckSum(READ_CO2)])
 
 function getCheckSum(packet: number[]): number {
