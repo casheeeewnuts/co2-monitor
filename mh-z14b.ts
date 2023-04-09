@@ -1,15 +1,31 @@
-import EventEmitter from "events";
 import {SerialPort} from "serialport";
 
 export class MhZ14b {
   private serial: SerialPort
-  constructor(options: ConstructorParameters<typeof SerialPort>[0]) {
-    this.serial = new SerialPort(options)
+  constructor(...args: ConstructorParameters<typeof SerialPort>) {
+    this.serial = new SerialPort(...args)
+  }
+
+  public open(): Promise<void> {
+    if (this.serial.isOpen) {
+      return Promise.resolve()
+    }
+
+    return new Promise((resolve, reject) => {
+      this.serial.open((err) => {
+        if (err) {
+          reject(err)
+        }
+
+        resolve()
+      })
+    })
   }
 
   public read(): Promise<number | null> {
     return new Promise((resolve, reject) => {
-      this.serial.write([0xFF, 0x01, 0x86, 0x00, 0x00, 0x00, 0x00, 0x00, 0x79], undefined, (err) => {
+      this.serial.write([0xFF, 0x01, 0x86, 0x00, 0x00, 0x00, 0x00, 0x00, 0x79])
+      this.serial.drain((err) => {
         if (err) {
           reject(err)
         }
@@ -40,7 +56,7 @@ export class MhZ14b {
     })
   }
 
-  private checksum(packet: number[]): number {
+  private static checksum(packet: number[]): number {
     const [startByte, ...bytes] = packet;
     let checksum = 0;
 
