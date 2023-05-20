@@ -30,13 +30,12 @@ const mhz14b = new MhZ14b({
     mhz14b.open()
   ])
 
-  console.log("hi")
   setInterval(async () => {
     const co2 = await mhz14b.read()
 
     if (co2) {
       await iotClient.publish({
-        qos: mqtt5.QoS.ExactlyOnce,
+        qos: mqtt5.QoS.AtLeastOnce,
         topicName: "gas-concentration/co2/home",
         payload: JSON.stringify({
           concentration: {
