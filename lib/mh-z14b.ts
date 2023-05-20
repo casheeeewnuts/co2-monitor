@@ -22,6 +22,22 @@ export class MhZ14b {
     })
   }
 
+  public close(): Promise<void> {
+    if (!this.serial.isOpen) {
+      return Promise.resolve()
+    }
+
+    return new Promise((resolve, reject) => {
+      this.serial.close((err) => {
+        if (err) {
+          reject(err)
+        }
+
+        resolve()
+      })
+    })
+  }
+
   public read(): Promise<number | null> {
     return new Promise((resolve, reject) => {
       this.serial.write([0xFF, 0x01, 0x86, 0x00, 0x00, 0x00, 0x00, 0x00, 0x79], 'binary', (err) => {
