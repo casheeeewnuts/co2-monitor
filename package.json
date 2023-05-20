@@ -1,6 +1,6 @@
 {
 	"scripts": {
-		"build": "ncc build index.ts"
+		"build": "tsc"
 	},
 	"dependencies": {
 		"aws-iot-device-sdk-v2": "^1.13.0",
