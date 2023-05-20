@@ -3,10 +3,10 @@ import {mqtt5, iot, io} from "aws-iot-device-sdk-v2"
 import {once} from "events"
 
 const mhz14b = new MhZ14b({
-    path: "/dev/serial0",
-    baudRate: 9600,
-    autoOpen: false
-  })
+  path: "/dev/serial0",
+  baudRate: 9600,
+  autoOpen: false
+});
 
 ;(async () => {
   const config = iot.AwsIotMqtt5ClientConfigBuilder.newWebsocketMqttBuilderWithSigv4Auth(
@@ -16,15 +16,21 @@ const mhz14b = new MhZ14b({
     }
   ).build();
 
-  const iotClient = new mqtt5.Mqtt5Client(config)
-  const started = once(iotClient, "connectionSuccess")
+  const iotClient = new mqtt5.Mqtt5Client(config);
 
+  iotClient.on("attemptingConnect", () => console.log("attempting to connect"))
+  iotClient.on("connectionSuccess", () => console.log("connection success"))
+
+  const started = once(iotClient, "connectionSuccess");
+
+  iotClient.start();
 
   await Promise.all([
     started,
     mhz14b.open()
   ])
 
+  console.log("hi")
   setInterval(async () => {
     const co2 = await mhz14b.read()
 
@@ -37,8 +43,8 @@ const mhz14b = new MhZ14b({
             co2
           }
         })
-      })
-      console.log(`CO2 is ${co2} ppm`)
+      });
+      console.log(`CO2 is ${co2} ppm`);
     }
-  }, 3000)
+  }, 3000);
 })()
