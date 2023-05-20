@@ -24,22 +24,27 @@ export class MhZ14b {
 
   public read(): Promise<number | null> {
     return new Promise((resolve, reject) => {
-      this.serial.write([0xFF, 0x01, 0x86, 0x00, 0x00, 0x00, 0x00, 0x00, 0x79])
-      this.serial.drain((err) => {
+      this.serial.write([0xFF, 0x01, 0x86, 0x00, 0x00, 0x00, 0x00, 0x00, 0x79], 'binary', (err) => {
         if (err) {
           reject(err)
         }
 
-        const bytes = this.serial.read(9) as Buffer | null
+        this.serial.drain((err) => {
+          if (err) {
+            reject(err)
+          }
 
-        if (!bytes) {
-          resolve(bytes)
-          return
-        }
+          const bytes = this.serial.read(9) as Buffer | null
 
-        const [startByte, command, high, low, ...rest] = bytes;
+          if (!bytes) {
+            return resolve(bytes)
+          }
 
-        resolve(high * 256 + low)
+          const [startByte, command, high, low, ...rest] = bytes;
+
+          return resolve(high * 256 + low)
+
+        })
       })
     })
   }

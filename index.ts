@@ -2,7 +2,8 @@ import {MhZ14b} from "./mh-z14b";
 
 const mhz14b = new MhZ14b({
   path: "/dev/serial0",
-  baudRate: 9600
+  baudRate: 9600,
+  autoOpen: false
 })
 
 ;(async () => {
