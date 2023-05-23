@@ -1,5 +1,5 @@
 import {MhZ14b} from "../lib/mh-z14b";
-import {mqtt5, iot, io} from "aws-iot-device-sdk-v2"
+import {mqtt5, iot} from "aws-iot-device-sdk-v2"
 import {once} from "events"
 
 const mhz14b = new MhZ14b({
@@ -18,8 +18,8 @@ const mhz14b = new MhZ14b({
 
   const iotClient = new mqtt5.Mqtt5Client(config);
 
-  iotClient.on("attemptingConnect", () => console.log("attempting to connect"))
-  iotClient.on("connectionSuccess", () => console.log("connection success"))
+  iotClient.on("attemptingConnect", () => console.error("attempting to connect"))
+  iotClient.on("connectionSuccess", () => console.error("connection success"))
 
   const started = once(iotClient, "connectionSuccess");
 
@@ -36,14 +36,15 @@ const mhz14b = new MhZ14b({
     if (co2) {
       await iotClient.publish({
         qos: mqtt5.QoS.AtLeastOnce,
-        topicName: "gas-concentration/co2/home",
+        topicName: "co2-concentration",
         payload: JSON.stringify({
           concentration: {
-            co2
+            co2,
+            at: process.env.AT ?? "home"
           }
         })
       });
       console.log(`CO2 is ${co2} ppm`);
     }
-  }, 3000);
+  }, 10000);
 })()
